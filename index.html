@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RYKU SNAKE</title>
+
+  <link href="https://fonts.cdnfonts.com/css/space-grotesk" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #c0ff38;
+      --ink: #0b0b0b;
+      --panel: rgba(255,255,255,.70);
+      --border: rgba(0,0,0,.18);
+      --shadow: rgba(0,0,0,.20);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .intro{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 1000;
+      background: var(--bg);
+      transition: opacity 550ms ease;
+      opacity: 1;
+    }
+    .intro.hide{ opacity: 0; pointer-events: none; }
+
+    .title{
+      cursor: pointer;
+      user-select: none;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: clamp(52px, 9vw, 128px);
+      line-height: 1;
+      margin: 0;
+      color: var(--ink);
+      animation: fadeUp 900ms ease forwards;
+      opacity: 0;
+      transform: translateY(14px);
+      text-align: center;
+      text-shadow: 0 12px 30px rgba(0,0,0,.18);
+      outline: none;
+    }
+    @keyframes fadeUp{
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .glitch{ position: relative; display: inline-block; }
+    .glitch::before,
+    .glitch::after{
+      content: attr(data-text);
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      pointer-events: none;
+      opacity: .85;
+    }
+    .glitch::before{
+      transform: translate(2px, 0);
+      text-shadow: -2px 0 #00e5ff;
+      animation: glitchA 1.15s infinite linear alternate-reverse;
+    }
+    .glitch::after{
+      transform: translate(-2px, 0);
+      text-shadow: 2px 0 #ff2bd6;
+      animation: glitchB 0.95s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitchA{
+      0%   { clip-path: inset(0 0 88% 0); transform: translate(2px, -1px); }
+      12%  { clip-path: inset(0 0 62% 0); transform: translate(-2px, 0); }
+      24%  { clip-path: inset(0 0 76% 0); transform: translate(3px, -2px); }
+      36%  { clip-path: inset(0 0 54% 0); transform: translate(0, 0); }
+      48%  { clip-path: inset(0 0 82% 0); transform: translate(2px, -1px); }
+      60%  { clip-path: inset(0 0 66% 0); transform: translate(-3px, 1px); }
+      72%  { clip-path: inset(0 0 80% 0); transform: translate(2px, 0); }
+      84%  { clip-path: inset(0 0 58% 0); transform: translate(4px, -1px); }
+      100% { clip-path: inset(0 0 88% 0); transform: translate(2px, 0); }
+    }
+    @keyframes glitchB{
+      0%   { clip-path: inset(86% 0 0 0); transform: translate(-2px, 1px); }
+      14%  { clip-path: inset(62% 0 0 0); transform: translate(3px, 2px); }
+      28%  { clip-path: inset(74% 0 0 0); transform: translate(-3px, 0); }
+      42%  { clip-path: inset(56% 0 0 0); transform: translate(0, 0); }
+      56%  { clip-path: inset(80% 0 0 0); transform: translate(-2px, 1px); }
+      70%  { clip-path: inset(66% 0 0 0); transform: translate(3px, -1px); }
+      84%  { clip-path: inset(78% 0 0 0); transform: translate(-1px, 2px); }
+      100% { clip-path: inset(86% 0 0 0); transform: translate(-2px, 1px); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .title{ animation: none; opacity: 1; transform: none; }
+      .glitch::before, .glitch::after{ animation: none; }
+      .intro{ transition: none; }
+    }
+
+    .game{
+      position: fixed;
+      inset: 0;
+      height: 100dvh;
+      display: none;
+      z-index: 1;
+
+      padding: 14px;
+      gap: 10px;
+
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      justify-items: center;
+      align-items: center;
+    }
+    .game.show{ display: grid; }
+
+    .hud{
+      width: min(1400px, 98vw);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .chip{
+      background: rgba(255,255,255,.55);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 14px 36px var(--shadow);
+      font-weight: 800;
+    }
+
+    .stage{
+      position: relative;
+      width: min(1400px, 98vw);
+      height: 100%;
+      background: rgba(255,255,255,.25);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 24px 80px var(--shadow);
+      overflow: hidden;
+    }
+
+    canvas{
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .overlay{
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+    .overlay.show{ opacity: 1; pointer-events: auto; }
+
+    .modal{
+      width: min(420px, 88%);
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px var(--shadow);
+      padding: 18px;
+      text-align: center;
+    }
+    .modal h2{ margin: 0 0 8px; font-size: 28px; }
+    .modal p{ margin: 0 0 14px; opacity: .85; }
+
+    .btn{
+      appearance: none;
+      border: 1px solid rgba(0,0,0,.25);
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 14px 36px var(--shadow);
+      transition: transform 120ms ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .hint{
+      width: min(1400px, 98vw);
+      font-size: 14px;
+      opacity: .8;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="intro" id="intro">
+    <h1 class="title glitch" id="enter" data-text="RYKU SNAKE">RYKU SNAKE</h1>
+  </div>
+
+  <main class="game" id="gameRoot" aria-label="Snake game">
+    <div class="hud">
+      <div class="chip" id="score">Score: 0</div>
+      <div class="chip" id="length">Length: 3</div>
+    </div>
+
+    <section class="stage" id="stage">
+      <canvas id="c"></canvas>
+
+      <div class="overlay" id="overlay">
+        <div class="modal">
+          <h2 id="ovTitle">Game Over</h2>
+          <p id="ovText">Press Restart to try again.</p>
+          <button class="btn" id="restart">Restart</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="hint">
+  Website made by chad <a href="https://x.com/realsirandrew" target="_blank" rel="noopener noreferrer">realsir</a> for the Raiku community.
+</div>
+  </main>
+
+<script>
+(() => {
+  const intro = document.getElementById('intro');
+  const enter = document.getElementById('enter');
+
+  const gameRoot = document.getElementById('gameRoot');
+  const stageEl  = document.getElementById('stage');
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  const scoreEl = document.getElementById('score');
+  const lengthEl = document.getElementById('length');
+
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const ovText  = document.getElementById('ovText');
+  const restartBtn = document.getElementById('restart');
+
+  const sprite = new Image();
+  sprite.src = "1.png";
+
+  const CELL_PX = 40; // <- make larger/smaller here
+
+  let COLS = 24;
+  let ROWS = 24;
+  let W = 600;
+  let H = 600;
+  let CELL = CELL_PX;
+
+  let started = false;
+  let running = false;
+  let rafId = 0;
+
+  let snake = [];
+  let dir = {x: 1, y: 0};
+  let nextDir = {x: 1, y: 0};
+  let food = {x: 0, y: 0};
+  let score = 0;
+
+  const STEP_MS_START = 95;
+  let stepMs = STEP_MS_START;
+  let lastStep = 0;
+
+  function randInt(max){ return Math.floor(Math.random() * max); }
+
+  function syncHUD(){
+    scoreEl.textContent = `Score: ${score}`;
+    lengthEl.textContent = `Length: ${snake.length}`;
+  }
+
+  function fitCanvas(){
+    const rect = stageEl.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    W = Math.floor(rect.width);
+    H = Math.floor(rect.height);
+
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    COLS = Math.max(8, Math.floor(W / CELL_PX));
+    ROWS = Math.max(8, Math.floor(H / CELL_PX));
+
+    CELL = Math.max(10, Math.floor(Math.min(W / COLS, H / ROWS)));
+
+    COLS = Math.max(8, Math.floor(W / CELL));
+    ROWS = Math.max(8, Math.floor(H / CELL));
+  }
+
+  function placeFood(){
+    while(true){
+      const fx = randInt(COLS);
+      const fy = randInt(ROWS);
+      if(!snake.some(s => s.x === fx && s.y === fy)){
+        food = {x: fx, y: fy};
+        return;
+      }
+    }
+  }
+
+  function showOverlay(title, text){
+    ovTitle.textContent = title;
+    ovText.textContent = text;
+    overlay.classList.add('show');
+  }
+
+  function hideOverlay(){
+    overlay.classList.remove('show');
+  }
+
+  function stopLoop(){
+    running = false;
+    cancelAnimationFrame(rafId);
+  }
+
+  function resetGame(){
+    if(!started) return;
+
+    fitCanvas();
+    stopLoop();
+    hideOverlay();
+
+    score = 0;
+    stepMs = STEP_MS_START;
+    lastStep = 0;
+
+    const sx = Math.floor(COLS / 2);
+    const sy = Math.floor(ROWS / 2);
+
+    snake = [
+      {x: sx,     y: sy},
+      {x: sx,     y: sy + 1},
+      {x: sx,     y: sy + 2},
+    ];
+
+    dir = {x: 0, y: -1};
+    nextDir = {x: 0, y: -1};
+
+    placeFood();
+    syncHUD();
+
+    running = true;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function setDir(nx, ny){
+    if (dir.x === -nx && dir.y === -ny) return;
+    nextDir = {x: nx, y: ny};
+  }
+
+  function step(){
+    dir = nextDir;
+
+    const head = snake[0];
+    const nh = {x: head.x + dir.x, y: head.y + dir.y};
+
+    if(nh.x < 0 || nh.x >= COLS || nh.y < 0 || nh.y >= ROWS){
+      stopLoop();
+      showOverlay("Game Over", "You hit the wall.");
+      return;
+    }
+
+    if(snake.some((s, i) => i !== 0 && s.x === nh.x && s.y === nh.y)){
+      stopLoop();
+      showOverlay("Game Over", "You hit yourself.");
+      return;
+    }
+
+    snake.unshift(nh);
+
+    if(nh.x === food.x && nh.y === food.y){
+      score += 1;
+      stepMs = Math.max(55, stepMs - 1);
+      placeFood();
+    } else {
+      snake.pop();
+    }
+
+    syncHUD();
+
+    if(snake.length >= COLS * ROWS){
+      stopLoop();
+      showOverlay("You win!", "The snake filled the entire field. Restart to play again.");
+    }
+  }
+
+  function drawSpriteInCell(cx, cy, scale = 0.86){
+    const x = cx * CELL;
+    const y = cy * CELL;
+
+    const pad = Math.max(1, Math.floor(CELL * (1 - scale) / 2));
+    const rx = x + pad;
+    const ry = y + pad;
+    const rw = CELL - pad * 2;
+    const rh = CELL - pad * 2;
+
+    if(sprite.complete && sprite.naturalWidth > 0){
+      ctx.drawImage(sprite, rx, ry, rw, rh);
+    } else {
+      ctx.fillStyle = "rgba(0,0,0,.85)";
+      ctx.fillRect(rx, ry, rw, rh);
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    for(let x=1; x<COLS; x++){
+      const px = x * CELL;
+      ctx.beginPath();
+      ctx.moveTo(px, 0);
+      ctx.lineTo(px, ROWS * CELL);
+      ctx.stroke();
+    }
+    for(let y=1; y<ROWS; y++){
+      const py = y * CELL;
+      ctx.beginPath();
+      ctx.moveTo(0, py);
+      ctx.lineTo(COLS * CELL, py);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    drawSpriteInCell(food.x, food.y, 0.86);
+
+    for(let i = snake.length - 1; i >= 0; i--){
+      const s = snake[i];
+      const isHead = i === 0;
+
+      drawSpriteInCell(s.x, s.y, 0.86);
+
+      if(isHead){
+        const x = s.x * CELL;
+        const y = s.y * CELL;
+        const pad = Math.max(1, Math.floor(CELL * 0.08));
+        ctx.strokeStyle = "rgba(0,0,0,.55)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + pad, y + pad, CELL - pad*2, CELL - pad*2);
+      }
+    }
+  }
+
+  function loop(ts){
+    if(!running) return;
+
+    if(!lastStep) lastStep = ts;
+    const elapsed = ts - lastStep;
+
+    if(elapsed >= stepMs){
+      lastStep = ts;
+      step();
+    }
+
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if(!started || !running) return;
+
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+
+    switch(e.key){
+      case "ArrowUp": setDir(0, -1); break;
+      case "ArrowDown": setDir(0, 1); break;
+      case "ArrowLeft": setDir(-1, 0); break;
+      case "ArrowRight": setDir(1, 0); break;
+    }
+  }, {passive: false});
+
+  window.addEventListener('resize', () => {
+    if(!started) return;
+    fitCanvas();
+  });
+
+  restartBtn.addEventListener('click', resetGame);
+
+  function enterGame(){
+    if(started) return;
+    started = true;
+
+    gameRoot.classList.add('show');
+    intro.classList.add('hide');
+
+    setTimeout(() => {
+      intro.style.display = "none";
+      resetGame();
+    }, 420);
+  }
+
+  enter.addEventListener('click', enterGame);
+  enter.addEventListener('keydown', (e) => {
+    if(e.key === "Enter" || e.key === " ") enterGame();
+  });
+  enter.setAttribute("tabindex", "0");
+})();
+</script>
+</body>
+</html>
