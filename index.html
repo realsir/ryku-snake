@@ -55,9 +55,7 @@
       text-shadow: 0 12px 30px rgba(0,0,0,.18);
       outline: none;
     }
-    @keyframes fadeUp{
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp{ to { opacity: 1; transform: translateY(0); } }
 
     .glitch{ position: relative; display: inline-block; }
     .glitch::before,
@@ -106,6 +104,7 @@
       .title{ animation: none; opacity: 1; transform: none; }
       .glitch::before, .glitch::after{ animation: none; }
       .intro{ transition: none; }
+      .overlay, .modalOverlay{ transition: none; }
     }
 
     .game{
@@ -130,7 +129,8 @@
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      align-items: baseline;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .chip{
@@ -140,6 +140,7 @@
       padding: 10px 14px;
       box-shadow: 0 14px 36px var(--shadow);
       font-weight: 800;
+      white-space: nowrap;
     }
 
     .stage{
@@ -153,11 +154,7 @@
       overflow: hidden;
     }
 
-    canvas{
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
+    canvas{ width: 100%; height: 100%; display: block; }
 
     .overlay{
       position: absolute;
@@ -172,8 +169,22 @@
     }
     .overlay.show{ opacity: 1; pointer-events: auto; }
 
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+    .modalOverlay.show{ opacity: 1; pointer-events: auto; }
+
     .modal{
-      width: min(420px, 88%);
+      width: min(560px, 92%);
       border-radius: 18px;
       background: var(--panel);
       border: 1px solid var(--border);
@@ -181,8 +192,66 @@
       padding: 18px;
       text-align: center;
     }
+
     .modal h2{ margin: 0 0 8px; font-size: 28px; }
     .modal p{ margin: 0 0 14px; opacity: .85; }
+
+    .cards{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 12px 0 14px;
+      text-align: left;
+    }
+
+    .card{
+      border-radius: 16px;
+      border:  1px solid rgba(0,0,0,.16);
+      background: rgba(255,255,255,.55);
+      padding: 12px;
+      box-shadow: 0 14px 36px var(--shadow);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .modebtn{
+      appearance: none;
+      border: 1px solid rgba(0,0,0,.25);
+      background: rgba(255,255,255,.80);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 950;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+      min-width: 120px;
+    }
+    .modebtn:active{ transform: translateY(1px); }
+    .modebtn[aria-pressed="true"]{
+      background: rgba(255,255,255,.98);
+      outline: 2px solid rgba(0,0,0,.18);
+    }
+
+    .card h3{
+      margin: 0 0 6px;
+      font-size: 16px;
+      letter-spacing: .02em;
+    }
+    .card .desc{
+      margin: 0;
+      opacity: .86;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .actions{
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
 
     .btn{
       appearance: none;
@@ -211,10 +280,47 @@
     <h1 class="title glitch" id="enter" data-text="RYKU SNAKE">RYKU SNAKE</h1>
   </div>
 
-  <main class="game" id="gameRoot" aria-label="Snake game">
+  <div class="modalOverlay" id="modeOverlay" aria-hidden="true">
+    <div class="modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modeTitle"
+         aria-describedby="modeDesc">
+      <h2 id="modeTitle">Choose mode</h2>
+      <p id="modeDesc">Pick a mode and press Start.</p>
+
+      <div class="cards">
+        <div class="card">
+          <button class="modebtn" id="pickClassic" type="button" aria-pressed="true">CLASSIC</button>
+          <div>
+            <h3>Classic Snake</h3>
+            <p class="desc">Eat ryku, grow, avoid walls and your body. Speed increases as you score.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <button class="modebtn" id="pickBricks" type="button" aria-pressed="false">BRICKS</button>
+          <div>
+            <h3>Bricks</h3>
+            <p class="desc">Each time you eat, a new brick appears. Hitting a brick ends the run.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="startGame" type="button">Start</button>
+        <button class="btn" id="backToTitle" type="button">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="game" id="gameRoot" aria-label="Snake game" aria-hidden="true">
     <div class="hud">
-      <div class="chip" id="score">Score: 0</div>
-      <div class="chip" id="length">Length: 3</div>
+      <div class="chip" id="modeLabel">Mode: CLASSIC</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="chip" id="score">Score: 0</div>
+        <div class="chip" id="length">Length: 3</div>
+      </div>
     </div>
 
     <section class="stage" id="stage">
@@ -223,15 +329,18 @@
       <div class="overlay" id="overlay">
         <div class="modal">
           <h2 id="ovTitle">Game Over</h2>
-          <p id="ovText">Press Restart to try again.</p>
-          <button class="btn" id="restart">Restart</button>
+          <p id="ovText">Choose Restart or go to Menu.</p>
+          <div class="actions">
+            <button class="btn" id="restart" type="button">Restart</button>
+            <button class="btn" id="menu" type="button">Menu</button>
+          </div>
         </div>
       </div>
     </section>
 
     <div class="hint">
-  Website made by chad <a href="https://x.com/realsirandrew" target="_blank" rel="noopener noreferrer">realsir</a> for the Raiku community.
-</div>
+      Website made by chad <a href="https://x.com/realsirandrew" target="_blank" rel="noopener noreferrer">realsir</a> for the Raiku community.
+    </div>
   </main>
 
 <script>
@@ -239,24 +348,31 @@
   const intro = document.getElementById('intro');
   const enter = document.getElementById('enter');
 
+  const modeOverlay = document.getElementById('modeOverlay');
+  const pickClassic = document.getElementById('pickClassic');
+  const pickBricks  = document.getElementById('pickBricks');
+  const startBtn    = document.getElementById('startGame');
+  const backBtn     = document.getElementById('backToTitle');
+
   const gameRoot = document.getElementById('gameRoot');
   const stageEl  = document.getElementById('stage');
-
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
 
   const scoreEl = document.getElementById('score');
   const lengthEl = document.getElementById('length');
+  const modeLabelEl = document.getElementById('modeLabel');
 
   const overlay = document.getElementById('overlay');
   const ovTitle = document.getElementById('ovTitle');
   const ovText  = document.getElementById('ovText');
   const restartBtn = document.getElementById('restart');
+  const menuBtn = document.getElementById('menu');
 
   const sprite = new Image();
   sprite.src = "1.png";
 
-  const CELL_PX = 40; // <- make larger/smaller here
+  const CELL_PX = 40;
 
   let COLS = 24;
   let ROWS = 24;
@@ -274,15 +390,22 @@
   let food = {x: 0, y: 0};
   let score = 0;
 
+  const MODE = { CLASSIC: "CLASSIC", BRICKS: "BRICKS" };
+  let mode = MODE.CLASSIC;
+
+  let bricks = [];
+
   const STEP_MS_START = 95;
   let stepMs = STEP_MS_START;
   let lastStep = 0;
 
   function randInt(max){ return Math.floor(Math.random() * max); }
+  function cellKey(x,y){ return `${x},${y}`; }
 
   function syncHUD(){
     scoreEl.textContent = `Score: ${score}`;
     lengthEl.textContent = `Length: ${snake.length}`;
+    modeLabelEl.textContent = `Mode: ${mode}`;
   }
 
   function fitCanvas(){
@@ -308,24 +431,13 @@
     ROWS = Math.max(8, Math.floor(H / CELL));
   }
 
-  function placeFood(){
-    while(true){
-      const fx = randInt(COLS);
-      const fy = randInt(ROWS);
-      if(!snake.some(s => s.x === fx && s.y === fy)){
-        food = {x: fx, y: fy};
-        return;
-      }
-    }
-  }
-
-  function showOverlay(title, text){
+  function showGameOver(title, text){
     ovTitle.textContent = title;
     ovText.textContent = text;
     overlay.classList.add('show');
+    restartBtn.focus();
   }
-
-  function hideOverlay(){
+  function hideGameOver(){
     overlay.classList.remove('show');
   }
 
@@ -334,16 +446,55 @@
     cancelAnimationFrame(rafId);
   }
 
-  function resetGame(){
-    if(!started) return;
+  function occupiedSet(){
+    const set = new Set();
+    for(const s of snake) set.add(cellKey(s.x, s.y));
+    set.add(cellKey(food.x, food.y));
+    if(mode === MODE.BRICKS){
+      for(const b of bricks) set.add(cellKey(b.x, b.y));
+    }
+    return set;
+  }
 
+  function placeFood(){
+    while(true){
+      const fx = randInt(COLS);
+      const fy = randInt(ROWS);
+      const hitSnake = snake.some(s => s.x === fx && s.y === fy);
+      const hitBrick = (mode === MODE.BRICKS) && bricks.some(b => b.x === fx && b.y === fy);
+      if(!hitSnake && !hitBrick){
+        food = {x: fx, y: fy};
+        return;
+      }
+    }
+  }
+
+  function spawnBrick(){
+    if(mode !== MODE.BRICKS) return;
+
+    const taken = occupiedSet();
+    const maxTries = Math.min(5000, COLS * ROWS * 2);
+
+    for(let i=0; i<maxTries; i++){
+      const bx = randInt(COLS);
+      const by = randInt(ROWS);
+      if(!taken.has(cellKey(bx,by))){
+        bricks.push({x: bx, y: by});
+        return;
+      }
+    }
+  }
+
+  function resetGame(){
     fitCanvas();
     stopLoop();
-    hideOverlay();
+    hideGameOver();
 
     score = 0;
     stepMs = STEP_MS_START;
     lastStep = 0;
+
+    bricks = [];
 
     const sx = Math.floor(COLS / 2);
     const sy = Math.floor(ROWS / 2);
@@ -369,6 +520,11 @@
     nextDir = {x: nx, y: ny};
   }
 
+  function gameOver(reason){
+    stopLoop();
+    showGameOver("Game Over", reason);
+  }
+
   function step(){
     dir = nextDir;
 
@@ -376,22 +532,27 @@
     const nh = {x: head.x + dir.x, y: head.y + dir.y};
 
     if(nh.x < 0 || nh.x >= COLS || nh.y < 0 || nh.y >= ROWS){
-      stopLoop();
-      showOverlay("Game Over", "You hit the wall.");
+      gameOver("You hit the wall.");
+      return;
+    }
+
+    if(mode === MODE.BRICKS && bricks.some(b => b.x === nh.x && b.y === nh.y)){
+      gameOver("You hit a brick.");
       return;
     }
 
     if(snake.some((s, i) => i !== 0 && s.x === nh.x && s.y === nh.y)){
-      stopLoop();
-      showOverlay("Game Over", "You hit yourself.");
+      gameOver("You hit yourself.");
       return;
     }
 
     snake.unshift(nh);
 
-    if(nh.x === food.x && nh.y === food.y){
+    const ate = (nh.x === food.x && nh.y === food.y);
+    if(ate){
       score += 1;
       stepMs = Math.max(55, stepMs - 1);
+      if(mode === MODE.BRICKS) spawnBrick();
       placeFood();
     } else {
       snake.pop();
@@ -401,7 +562,7 @@
 
     if(snake.length >= COLS * ROWS){
       stopLoop();
-      showOverlay("You win!", "The snake filled the entire field. Restart to play again.");
+      showGameOver("You win!", "The snake filled the entire field. Restart or Menu.");
     }
   }
 
@@ -421,6 +582,26 @@
       ctx.fillStyle = "rgba(0,0,0,.85)";
       ctx.fillRect(rx, ry, rw, rh);
     }
+  }
+
+  function drawBrickInCell(cx, cy){
+    const x = cx * CELL;
+    const y = cy * CELL;
+
+    const pad = Math.max(1, Math.floor(CELL * 0.10));
+    const rx = x + pad;
+    const ry = y + pad;
+    const rw = CELL - pad * 2;
+    const rh = CELL - pad * 2;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,.85)";
+    ctx.fillRect(rx, ry, rw, rh);
+
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(rx + Math.floor(rw*0.08), ry + Math.floor(rh*0.12), Math.floor(rw*0.55), Math.floor(rh*0.22));
+    ctx.restore();
   }
 
   function draw(){
@@ -445,6 +626,12 @@
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
+
+    if(mode === MODE.BRICKS){
+      for(const b of bricks){
+        drawBrickInCell(b.x, b.y);
+      }
+    }
 
     drawSpriteInCell(food.x, food.y, 0.86);
 
@@ -480,7 +667,75 @@
     rafId = requestAnimationFrame(loop);
   }
 
+  function setMode(newMode){
+    mode = newMode;
+    pickClassic.setAttribute("aria-pressed", String(mode === MODE.CLASSIC));
+    pickBricks.setAttribute("aria-pressed", String(mode === MODE.BRICKS));
+    syncHUD();
+  }
+
+  function openModeSelect(){
+    modeOverlay.classList.add('show');
+    modeOverlay.setAttribute('aria-hidden', 'false');
+    (mode === MODE.CLASSIC ? pickClassic : pickBricks).focus();
+  }
+
+  function closeModeSelect(){
+    modeOverlay.classList.remove('show');
+    modeOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function showGame(){
+    gameRoot.classList.add('show');
+    gameRoot.setAttribute('aria-hidden', 'false');
+  }
+
+  function hideGame(){
+    gameRoot.classList.remove('show');
+    gameRoot.setAttribute('aria-hidden', 'true');
+  }
+
+  function returnToMenu(){
+    hideGameOver();
+    stopLoop();
+    openModeSelect();
+  }
+
+  pickClassic.addEventListener('click', () => setMode(MODE.CLASSIC));
+  pickBricks.addEventListener('click', () => setMode(MODE.BRICKS));
+
+  startBtn.addEventListener('click', () => {
+    closeModeSelect();
+    showGame();
+    resetGame();
+  });
+
+  backBtn.addEventListener('click', () => {
+    closeModeSelect();
+    hideGame();
+    intro.classList.remove('hide');
+    intro.style.display = "grid";
+    started = false;
+    stopLoop();
+    enter.focus();
+  });
+
+  restartBtn.addEventListener('click', () => resetGame());
+  menuBtn.addEventListener('click', () => returnToMenu());
+
   window.addEventListener('keydown', (e) => {
+    if(modeOverlay.classList.contains('show') && e.key === "Escape"){
+      e.preventDefault();
+      backBtn.click();
+      return;
+    }
+
+    if(overlay.classList.contains('show') && e.key === "Escape"){
+      e.preventDefault();
+      returnToMenu();
+      return;
+    }
+
     if(!started || !running) return;
 
     if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
@@ -498,18 +753,15 @@
     fitCanvas();
   });
 
-  restartBtn.addEventListener('click', resetGame);
-
   function enterGame(){
     if(started) return;
     started = true;
 
-    gameRoot.classList.add('show');
     intro.classList.add('hide');
-
     setTimeout(() => {
       intro.style.display = "none";
-      resetGame();
+      setMode(MODE.CLASSIC);
+      openModeSelect();
     }, 420);
   }
 
@@ -518,6 +770,8 @@
     if(e.key === "Enter" || e.key === " ") enterGame();
   });
   enter.setAttribute("tabindex", "0");
+
+  hideGame();
 })();
 </script>
 </body>
