@@ -15,7 +15,6 @@
       --border: rgba(0,0,0,.18);
       --shadow: rgba(0,0,0,.20);
     }
-
     *{ box-sizing: border-box; }
     html, body{ height: 100%; }
     body{
@@ -77,7 +76,6 @@
       text-shadow: 2px 0 #ff2bd6;
       animation: glitchB 0.95s infinite linear alternate-reverse;
     }
-
     @keyframes glitchA{
       0%   { clip-path: inset(0 0 88% 0); transform: translate(2px, -1px); }
       12%  { clip-path: inset(0 0 62% 0); transform: translate(-2px, 0); }
@@ -100,48 +98,20 @@
       100% { clip-path: inset(86% 0 0 0); transform: translate(-2px, 1px); }
     }
 
-    @media (prefers-reduced-motion: reduce){
-      .title{ animation: none; opacity: 1; transform: none; }
-      .glitch::before, .glitch::after{ animation: none; }
-      .intro{ transition: none; }
-      .overlay, .modalOverlay{ transition: none; }
-    }
-
     .game{
       position: fixed;
       inset: 0;
       height: 100dvh;
       display: none;
       z-index: 1;
-
       padding: 14px;
-      gap: 10px;
-
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: 1fr auto;
       justify-items: center;
       align-items: center;
+      gap: 10px;
     }
     .game.show{ display: grid; }
-
-    .hud{
-      width: min(1400px, 98vw);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .chip{
-      background: rgba(255,255,255,.55);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 10px 14px;
-      box-shadow: 0 14px 36px var(--shadow);
-      font-weight: 800;
-      white-space: nowrap;
-    }
 
     .stage{
       position: relative;
@@ -225,7 +195,7 @@
       font-weight: 950;
       cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
-      min-width: 120px;
+      min-width: 160px;
     }
     .modebtn:active{ transform: translateY(1px); }
     .modebtn[aria-pressed="true"]{
@@ -233,17 +203,8 @@
       outline: 2px solid rgba(0,0,0,.18);
     }
 
-    .card h3{
-      margin: 0 0 6px;
-      font-size: 16px;
-      letter-spacing: .02em;
-    }
-    .card .desc{
-      margin: 0;
-      opacity: .86;
-      font-size: 14px;
-      line-height: 1.35;
-    }
+    .card h3{ margin: 0 0 6px; font-size: 16px; letter-spacing: .02em; }
+    .card .desc{ margin: 0; opacity: .86; font-size: 14px; line-height: 1.35; }
 
     .actions{
       display: flex;
@@ -272,6 +233,23 @@
       opacity: .8;
       text-align: center;
     }
+
+    .toast{
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(0,0,0,.18);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 14px 36px var(--shadow);
+      font-weight: 950;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+    .toast.show{ opacity: 1; }
   </style>
 </head>
 
@@ -281,11 +259,7 @@
   </div>
 
   <div class="modalOverlay" id="modeOverlay" aria-hidden="true">
-    <div class="modal"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="modeTitle"
-         aria-describedby="modeDesc">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modeTitle" aria-describedby="modeDesc">
       <h2 id="modeTitle">Choose mode</h2>
       <p id="modeDesc">Pick a mode and press Start.</p>
 
@@ -293,16 +267,29 @@
         <div class="card">
           <button class="modebtn" id="pickClassic" type="button" aria-pressed="true">CLASSIC</button>
           <div>
-            <h3>Classic Snake</h3>
-            <p class="desc">Eat ryku, grow, avoid walls and your body. Speed increases as you score.</p>
+            <p class="desc">Eat, grow, avoid walls and your body.</p>
           </div>
         </div>
 
         <div class="card">
           <button class="modebtn" id="pickBricks" type="button" aria-pressed="false">BRICKS</button>
           <div>
-            <h3>Bricks</h3>
-            <p class="desc">Each time you eat, a new brick appears. Hitting a brick ends the run.</p>
+            <p class="desc">Each time you eat, a new brick appears.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <button class="modebtn" id="pickDegen" type="button" aria-pressed="false">DEGEN MODE</button>
+          <div>
+            <p class="desc">Every step you take is a game bonus. No chance of winning.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <button class="modebtn" id="pickStep" type="button" aria-pressed="false">STEP by STEP</button>
+          <div>
+ 
+            <p class="desc">Every time you grow, a bonus will appear on you or on the field.</p>
           </div>
         </div>
       </div>
@@ -315,16 +302,9 @@
   </div>
 
   <main class="game" id="gameRoot" aria-label="Snake game" aria-hidden="true">
-    <div class="hud">
-      <div class="chip" id="modeLabel">Mode: CLASSIC</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <div class="chip" id="score">Score: 0</div>
-        <div class="chip" id="length">Length: 3</div>
-      </div>
-    </div>
-
-    <section class="stage" id="stage">
+    <section class="stage" id="stageEl">
       <canvas id="c"></canvas>
+      <div class="toast" id="toast" aria-live="polite"></div>
 
       <div class="overlay" id="overlay">
         <div class="modal">
@@ -351,17 +331,17 @@
   const modeOverlay = document.getElementById('modeOverlay');
   const pickClassic = document.getElementById('pickClassic');
   const pickBricks  = document.getElementById('pickBricks');
+  const pickDegen   = document.getElementById('pickDegen');
+  const pickStep    = document.getElementById('pickStep');
   const startBtn    = document.getElementById('startGame');
   const backBtn     = document.getElementById('backToTitle');
 
   const gameRoot = document.getElementById('gameRoot');
-  const stageEl  = document.getElementById('stage');
+  const stageEl  = document.getElementById('stageEl');
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
 
-  const scoreEl = document.getElementById('score');
-  const lengthEl = document.getElementById('length');
-  const modeLabelEl = document.getElementById('modeLabel');
+  const toastEl = document.getElementById('toast');
 
   const overlay = document.getElementById('overlay');
   const ovTitle = document.getElementById('ovTitle');
@@ -373,39 +353,44 @@
   sprite.src = "1.png";
 
   const CELL_PX = 40;
+  let COLS = 24, ROWS = 24, W = 600, H = 600, CELL = CELL_PX;
 
-  let COLS = 24;
-  let ROWS = 24;
-  let W = 600;
-  let H = 600;
-  let CELL = CELL_PX;
+  const MODE = {
+    CLASSIC: "CLASSIC",
+    BRICKS: "BRICKS",
+    DEGEN: "DEGEN MODE",
+    STEP: "STEP by STEP"
+  };
+  let mode = MODE.CLASSIC;
 
   let started = false;
   let running = false;
   let rafId = 0;
+  let lastStepTs = 0;
 
   let snake = [];
-  let dir = {x: 1, y: 0};
-  let nextDir = {x: 1, y: 0};
-  let food = {x: 0, y: 0};
-  let score = 0;
+  let dir = {x: 0, y: -1};
+  let nextDir = {x: 0, y: -1};
 
-  const MODE = { CLASSIC: "CLASSIC", BRICKS: "BRICKS" };
-  let mode = MODE.CLASSIC;
-
+  let foods = [];
   let bricks = [];
 
-  const STEP_MS_START = 95;
-  let stepMs = STEP_MS_START;
-  let lastStep = 0;
+  let baseStepMs = 95;
+
+  let lives = 0;
+  let slowUntilTs = 0;
+  let chainIndex = 0;
+
+  let pendingExtraGrowth = 0; 
 
   function randInt(max){ return Math.floor(Math.random() * max); }
   function cellKey(x,y){ return `${x},${y}`; }
 
-  function syncHUD(){
-    scoreEl.textContent = `Score: ${score}`;
-    lengthEl.textContent = `Length: ${snake.length}`;
-    modeLabelEl.textContent = `Mode: ${mode}`;
+  function showToast(text, ms=900){
+    toastEl.textContent = text;
+    toastEl.classList.add('show');
+    window.clearTimeout(showToast._t);
+    showToast._t = window.setTimeout(() => toastEl.classList.remove('show'), ms);
   }
 
   function fitCanvas(){
@@ -431,58 +416,140 @@
     ROWS = Math.max(8, Math.floor(H / CELL));
   }
 
+  function stopLoop(){
+    running = false;
+    cancelAnimationFrame(rafId);
+  }
+
   function showGameOver(title, text){
     ovTitle.textContent = title;
     ovText.textContent = text;
     overlay.classList.add('show');
     restartBtn.focus();
   }
+
   function hideGameOver(){
     overlay.classList.remove('show');
   }
 
-  function stopLoop(){
-    running = false;
-    cancelAnimationFrame(rafId);
-  }
-
-  function occupiedSet(){
+  function occupiedSet(includeFoods=true){
     const set = new Set();
     for(const s of snake) set.add(cellKey(s.x, s.y));
-    set.add(cellKey(food.x, food.y));
-    if(mode === MODE.BRICKS){
-      for(const b of bricks) set.add(cellKey(b.x, b.y));
+    for(const b of bricks) set.add(cellKey(b.x, b.y));
+    if(includeFoods){
+      for(const f of foods) set.add(cellKey(f.x, f.y));
     }
     return set;
   }
 
-  function placeFood(){
-    while(true){
-      const fx = randInt(COLS);
-      const fy = randInt(ROWS);
-      const hitSnake = snake.some(s => s.x === fx && s.y === fy);
-      const hitBrick = (mode === MODE.BRICKS) && bricks.some(b => b.x === fx && b.y === fy);
-      if(!hitSnake && !hitBrick){
-        food = {x: fx, y: fy};
-        return;
+  function placeFoodOne(){
+    const taken = occupiedSet(true);
+    const tries = Math.min(18000, COLS * ROWS * 14);
+
+    for(let i=0;i<tries;i++){
+      const fx = randInt(COLS), fy = randInt(ROWS);
+      const k = cellKey(fx,fy);
+      if(!taken.has(k)) return {x: fx, y: fy};
+    }
+    return {x: randInt(COLS), y: randInt(ROWS)};
+  }
+
+  function ensureFoodCount(n){
+    foods = foods.slice(0, n);
+    while(foods.length < n) foods.push(placeFoodOne());
+  }
+
+  function spawnBricks(count){
+    const taken = occupiedSet(true);
+    const tries = Math.min(26000, COLS * ROWS * 20);
+
+    let placed = 0;
+    for(let i=0;i<tries && placed<count;i++){
+      const bx = randInt(COLS), by = randInt(ROWS);
+      const k = cellKey(bx,by);
+      if(!taken.has(k)){
+        bricks.push({x: bx, y: by});
+        taken.add(k);
+        placed++;
       }
     }
   }
 
-  function spawnBrick(){
-    if(mode !== MODE.BRICKS) return;
+  function shrinkSnake(by){
+    const target = Math.max(3, snake.length - by);
+    while(snake.length > target) snake.pop();
+  }
 
-    const taken = occupiedSet();
-    const maxTries = Math.min(5000, COLS * ROWS * 2);
-
-    for(let i=0; i<maxTries; i++){
-      const bx = randInt(COLS);
-      const by = randInt(ROWS);
-      if(!taken.has(cellKey(bx,by))){
-        bricks.push({x: bx, y: by});
-        return;
-      }
+  function collisionSelf(nh, willEat){
+    const tail = snake[snake.length - 1];
+    for(let i=1;i<snake.length;i++){
+      const s = snake[i];
+      if(!willEat && i === snake.length - 1 && s.x === tail.x && s.y === tail.y) continue;
+      if(s.x === nh.x && s.y === nh.y) return true;
     }
+    return false;
+  }
+
+  function consumeLife(reason){
+    if(mode !== MODE.DEGEN && mode !== MODE.STEP) return false;
+    if(lives <= 0) return false;
+    lives -= 1;
+    showToast(`Life lost (${reason})`);
+    return true;
+  }
+
+  function effectiveStepMs(nowTs){
+    let ms = baseStepMs;
+    if((mode === MODE.DEGEN || mode === MODE.STEP) && nowTs < slowUntilTs){
+      ms = Math.floor(ms * 1.6);
+    }
+    return ms;
+  }
+
+  const ACTIONS_DEGEN = [
+    { run(nowTs){ lives += 1; showToast("+1 life"); } },
+    { run(nowTs){ spawnBricks(4); showToast("+4 obstacles"); } },
+    { run(nowTs){ slowUntilTs = Math.max(slowUntilTs, nowTs) + 10_000; showToast("Slow 10s"); } },
+    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+    { run(nowTs){ shrinkSnake(5); showToast("Shrink -5"); } },
+    { run(nowTs){ ensureFoodCount(2); showToast("2 foods"); } },
+    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+  ];
+
+  const ACTIONS_STEP = [
+    { run(nowTs){ lives += 1; showToast("+1 life"); } },
+    { run(nowTs){ spawnBricks(4); showToast("+4 obstacles"); } },
+    { run(nowTs){ slowUntilTs = Math.max(slowUntilTs, nowTs) + 10_000; showToast("Slow 10s"); } },
+    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+    { run(nowTs){ shrinkSnake(5); showToast("Shrink -5"); } },
+    { run(nowTs){ ensureFoodCount(2); showToast("2 foods"); } },
+    { run(nowTs){ pendingExtraGrowth += 3; showToast("Grow +3"); } },  
+    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+  ];
+
+  function applyNextChainAction(nowTs){
+    const list = (mode === MODE.STEP) ? ACTIONS_STEP : ACTIONS_DEGEN;
+    const n = list.length;
+    const idx = chainIndex % n;
+    const action = list[idx];
+    chainIndex++;
+    action.run(nowTs);
+
+    if(chainIndex % n === 0 && n >= 2){
+      const a = (Math.floor(chainIndex / n) - 1) % n;
+      const b = (a + 3) % n;
+      const t = list[a];
+      list[a] = list[b];
+      list[b] = t;
+    }
+  }
+
+  function resetSpecialModes(){
+    lives = 1;
+    slowUntilTs = 0;
+    chainIndex = 0;
+    pendingExtraGrowth = 0;
+    ensureFoodCount(1);
   }
 
   function resetGame(){
@@ -490,79 +557,99 @@
     stopLoop();
     hideGameOver();
 
-    score = 0;
-    stepMs = STEP_MS_START;
-    lastStep = 0;
-
     bricks = [];
+    foods = [];
+    baseStepMs = 95;
+    lastStepTs = 0;
 
     const sx = Math.floor(COLS / 2);
     const sy = Math.floor(ROWS / 2);
 
     snake = [
-      {x: sx,     y: sy},
-      {x: sx,     y: sy + 1},
-      {x: sx,     y: sy + 2},
+      {x: sx, y: sy},
+      {x: sx, y: sy + 1},
+      {x: sx, y: sy + 2},
     ];
 
     dir = {x: 0, y: -1};
     nextDir = {x: 0, y: -1};
 
-    placeFood();
-    syncHUD();
+    ensureFoodCount(1);
+
+    if(mode === MODE.DEGEN || mode === MODE.STEP){
+      resetSpecialModes();
+    }
 
     running = true;
     rafId = requestAnimationFrame(loop);
   }
 
-  function setDir(nx, ny){
-    if (dir.x === -nx && dir.y === -ny) return;
-    nextDir = {x: nx, y: ny};
-  }
+  function step(nowTs){
+    if(mode === MODE.DEGEN){
+      applyNextChainAction(nowTs);
+    }
 
-  function gameOver(reason){
-    stopLoop();
-    showGameOver("Game Over", reason);
-  }
-
-  function step(){
     dir = nextDir;
 
     const head = snake[0];
     const nh = {x: head.x + dir.x, y: head.y + dir.y};
 
-    if(nh.x < 0 || nh.x >= COLS || nh.y < 0 || nh.y >= ROWS){
-      gameOver("You hit the wall.");
+    const hitWall = (nh.x < 0 || nh.x >= COLS || nh.y < 0 || nh.y >= ROWS);
+    if(hitWall){
+      if(consumeLife("wall")) return;
+      showGameOver("Game Over", "You hit the wall.");
+      stopLoop();
       return;
     }
 
-    if(mode === MODE.BRICKS && bricks.some(b => b.x === nh.x && b.y === nh.y)){
-      gameOver("You hit a brick.");
+    const hitBrick = bricks.some(b => b.x === nh.x && b.y === nh.y);
+    if(hitBrick){
+      if(consumeLife("obstacle")) return;
+      showGameOver("Game Over", "You hit an obstacle.");
+      stopLoop();
       return;
     }
 
-    if(snake.some((s, i) => i !== 0 && s.x === nh.x && s.y === nh.y)){
-      gameOver("You hit yourself.");
+    let eatenIdx = -1;
+    for(let i=0;i<foods.length;i++){
+      if(foods[i].x === nh.x && foods[i].y === nh.y){ eatenIdx = i; break; }
+    }
+    const willEat = eatenIdx !== -1;
+
+    if(collisionSelf(nh, willEat)){
+      if(consumeLife("self")) return;
+      showGameOver("Game Over", "You hit yourself.");
+      stopLoop();
       return;
     }
 
     snake.unshift(nh);
 
-    const ate = (nh.x === food.x && nh.y === food.y);
-    if(ate){
-      score += 1;
-      stepMs = Math.max(55, stepMs - 1);
-      if(mode === MODE.BRICKS) spawnBrick();
-      placeFood();
+    if(willEat){
+      baseStepMs = Math.max(55, baseStepMs - 1);
+
+      foods.splice(eatenIdx, 1);
+      foods.push(placeFoodOne());
+
+      if(mode === MODE.BRICKS){
+        spawnBricks(1);
+      }
+
+      if(mode === MODE.STEP){
+        applyNextChainAction(nowTs);
+      }
+
+
     } else {
-      snake.pop();
+      if(pendingExtraGrowth > 0){
+        pendingExtraGrowth -= 1; 
+      } else {
+        snake.pop();
+      }
     }
 
-    syncHUD();
-
-    if(snake.length >= COLS * ROWS){
-      stopLoop();
-      showGameOver("You win!", "The snake filled the entire field. Restart or Menu.");
+    if(mode === MODE.DEGEN || mode === MODE.STEP){
+      if(foods.length === 0) ensureFoodCount(1);
     }
   }
 
@@ -597,7 +684,6 @@
     ctx.save();
     ctx.fillStyle = "rgba(0,0,0,.85)";
     ctx.fillRect(rx, ry, rw, rh);
-
     ctx.globalAlpha = 0.18;
     ctx.fillStyle = "#fff";
     ctx.fillRect(rx + Math.floor(rw*0.08), ry + Math.floor(rh*0.12), Math.floor(rw*0.55), Math.floor(rh*0.22));
@@ -610,7 +696,6 @@
     ctx.globalAlpha = 0.12;
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
-
     for(let x=1; x<COLS; x++){
       const px = x * CELL;
       ctx.beginPath();
@@ -627,13 +712,11 @@
     }
     ctx.globalAlpha = 1;
 
-    if(mode === MODE.BRICKS){
-      for(const b of bricks){
-        drawBrickInCell(b.x, b.y);
-      }
+    if(mode === MODE.BRICKS || mode === MODE.DEGEN || mode === MODE.STEP){
+      for(const b of bricks) drawBrickInCell(b.x, b.y);
     }
 
-    drawSpriteInCell(food.x, food.y, 0.86);
+    for(const f of foods) drawSpriteInCell(f.x, f.y, 0.86);
 
     for(let i = snake.length - 1; i >= 0; i--){
       const s = snake[i];
@@ -655,12 +738,13 @@
   function loop(ts){
     if(!running) return;
 
-    if(!lastStep) lastStep = ts;
-    const elapsed = ts - lastStep;
+    if(!lastStepTs) lastStepTs = ts;
+    const elapsed = ts - lastStepTs;
 
-    if(elapsed >= stepMs){
-      lastStep = ts;
-      step();
+    const target = effectiveStepMs(ts);
+    if(elapsed >= target){
+      lastStepTs = ts;
+      step(ts);
     }
 
     draw();
@@ -671,13 +755,19 @@
     mode = newMode;
     pickClassic.setAttribute("aria-pressed", String(mode === MODE.CLASSIC));
     pickBricks.setAttribute("aria-pressed", String(mode === MODE.BRICKS));
-    syncHUD();
+    pickDegen.setAttribute("aria-pressed", String(mode === MODE.DEGEN));
+    pickStep.setAttribute("aria-pressed", String(mode === MODE.STEP));
   }
 
   function openModeSelect(){
     modeOverlay.classList.add('show');
     modeOverlay.setAttribute('aria-hidden', 'false');
-    (mode === MODE.CLASSIC ? pickClassic : pickBricks).focus();
+
+    let btn = pickClassic;
+    if(mode === MODE.BRICKS) btn = pickBricks;
+    if(mode === MODE.DEGEN) btn = pickDegen;
+    if(mode === MODE.STEP) btn = pickStep;
+    btn.focus();
   }
 
   function closeModeSelect(){
@@ -703,6 +793,8 @@
 
   pickClassic.addEventListener('click', () => setMode(MODE.CLASSIC));
   pickBricks.addEventListener('click', () => setMode(MODE.BRICKS));
+  pickDegen.addEventListener('click', () => setMode(MODE.DEGEN));
+  pickStep.addEventListener('click', () => setMode(MODE.STEP));
 
   startBtn.addEventListener('click', () => {
     closeModeSelect();
@@ -723,23 +815,25 @@
   restartBtn.addEventListener('click', () => resetGame());
   menuBtn.addEventListener('click', () => returnToMenu());
 
+  function setDir(nx, ny){
+    if (dir.x === -nx && dir.y === -ny) return;
+    nextDir = {x: nx, y: ny};
+  }
+
   window.addEventListener('keydown', (e) => {
     if(modeOverlay.classList.contains('show') && e.key === "Escape"){
       e.preventDefault();
       backBtn.click();
       return;
     }
-
     if(overlay.classList.contains('show') && e.key === "Escape"){
       e.preventDefault();
       returnToMenu();
       return;
     }
-
     if(!started || !running) return;
 
     if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
-
     switch(e.key){
       case "ArrowUp": setDir(0, -1); break;
       case "ArrowDown": setDir(0, 1); break;
