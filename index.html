@@ -4,255 +4,415 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RYKU SNAKE</title>
-
   <link href="https://fonts.cdnfonts.com/css/space-grotesk" rel="stylesheet">
-
   <style>
     :root{
-      --bg: #c0ff38;
-      --ink: #0b0b0b;
-      --panel: rgba(255,255,255,.70);
-      --border: rgba(0,0,0,.18);
-      --shadow: rgba(0,0,0,.20);
+      --bg:#c0ff38;
+      --ink:#0b0b0b;
+      --panel:rgba(255,255,255,.78);
+      --panel2:rgba(255,255,255,.9);
+      --border:rgba(0,0,0,.16);
+      --shadow:rgba(0,0,0,.18);
+      --accent:#0b0b0b;
     }
-    *{ box-sizing: border-box; }
-    html, body{ height: 100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: "Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow: hidden;
+      margin:0;
+      background:
+        radial-gradient(circle at top, #f2ffb0 0%, #dfff77 18%, #c0ff38 55%, #a7e81c 100%);
+      color:var(--ink);
+      font-family:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      overflow:hidden;
     }
 
     .intro{
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      z-index: 1000;
-      background: var(--bg);
-      transition: opacity 550ms ease;
-      opacity: 1;
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      z-index:1000;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,.35), transparent 42%),
+        linear-gradient(180deg, rgba(192,255,56,.98), rgba(192,255,56,.94));
+      transition:opacity 550ms ease;
+      opacity:1;
     }
-    .intro.hide{ opacity: 0; pointer-events: none; }
+    .intro.hide{opacity:0;pointer-events:none}
 
     .title{
-      cursor: pointer;
-      user-select: none;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-size: clamp(52px, 9vw, 128px);
-      line-height: 1;
-      margin: 0;
-      color: var(--ink);
-      animation: fadeUp 900ms ease forwards;
-      opacity: 0;
-      transform: translateY(14px);
-      text-align: center;
-      text-shadow: 0 12px 30px rgba(0,0,0,.18);
-      outline: none;
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:clamp(54px,10vw,132px);
+      line-height:1;
+      margin:0;
+      color:var(--ink);
+      animation:fadeUp .9s ease forwards;
+      opacity:0;
+      transform:translateY(14px);
+      text-align:center;
+      text-shadow:0 14px 34px rgba(0,0,0,.18);
+      outline:none;
     }
-    @keyframes fadeUp{ to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
-    .glitch{ position: relative; display: inline-block; }
-    .glitch::before,
-    .glitch::after{
-      content: attr(data-text);
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%;
-      pointer-events: none;
-      opacity: .85;
+    .glitch{position:relative;display:inline-block}
+    .glitch::before,.glitch::after{
+      content:attr(data-text);
+      position:absolute;
+      left:0;top:0;
+      width:100%;
+      pointer-events:none;
+      opacity:.88;
     }
     .glitch::before{
-      transform: translate(2px, 0);
-      text-shadow: -2px 0 #00e5ff;
-      animation: glitchA 1.15s infinite linear alternate-reverse;
+      transform:translate(2px,0);
+      text-shadow:-2px 0 #00e5ff;
+      animation:gA 1.15s infinite linear alternate-reverse;
     }
     .glitch::after{
-      transform: translate(-2px, 0);
-      text-shadow: 2px 0 #ff2bd6;
-      animation: glitchB 0.95s infinite linear alternate-reverse;
+      transform:translate(-2px,0);
+      text-shadow:2px 0 #ff2bd6;
+      animation:gB .95s infinite linear alternate-reverse;
     }
-    @keyframes glitchA{
-      0%   { clip-path: inset(0 0 88% 0); transform: translate(2px, -1px); }
-      12%  { clip-path: inset(0 0 62% 0); transform: translate(-2px, 0); }
-      24%  { clip-path: inset(0 0 76% 0); transform: translate(3px, -2px); }
-      36%  { clip-path: inset(0 0 54% 0); transform: translate(0, 0); }
-      48%  { clip-path: inset(0 0 82% 0); transform: translate(2px, -1px); }
-      60%  { clip-path: inset(0 0 66% 0); transform: translate(-3px, 1px); }
-      72%  { clip-path: inset(0 0 80% 0); transform: translate(2px, 0); }
-      84%  { clip-path: inset(0 0 58% 0); transform: translate(4px, -1px); }
-      100% { clip-path: inset(0 0 88% 0); transform: translate(2px, 0); }
+    @keyframes gA{
+      0%{clip-path:inset(0 0 88% 0);transform:translate(2px,-1px)}
+      12%{clip-path:inset(0 0 62% 0);transform:translate(-2px,0)}
+      24%{clip-path:inset(0 0 76% 0);transform:translate(3px,-2px)}
+      36%{clip-path:inset(0 0 54% 0);transform:translate(0,0)}
+      48%{clip-path:inset(0 0 82% 0);transform:translate(2px,-1px)}
+      60%{clip-path:inset(0 0 66% 0);transform:translate(-3px,1px)}
+      72%{clip-path:inset(0 0 80% 0);transform:translate(2px,0)}
+      84%{clip-path:inset(0 0 58% 0);transform:translate(4px,-1px)}
+      100%{clip-path:inset(0 0 88% 0);transform:translate(2px,0)}
     }
-    @keyframes glitchB{
-      0%   { clip-path: inset(86% 0 0 0); transform: translate(-2px, 1px); }
-      14%  { clip-path: inset(62% 0 0 0); transform: translate(3px, 2px); }
-      28%  { clip-path: inset(74% 0 0 0); transform: translate(-3px, 0); }
-      42%  { clip-path: inset(56% 0 0 0); transform: translate(0, 0); }
-      56%  { clip-path: inset(80% 0 0 0); transform: translate(-2px, 1px); }
-      70%  { clip-path: inset(66% 0 0 0); transform: translate(3px, -1px); }
-      84%  { clip-path: inset(78% 0 0 0); transform: translate(-1px, 2px); }
-      100% { clip-path: inset(86% 0 0 0); transform: translate(-2px, 1px); }
+    @keyframes gB{
+      0%{clip-path:inset(86% 0 0 0);transform:translate(-2px,1px)}
+      14%{clip-path:inset(62% 0 0 0);transform:translate(3px,2px)}
+      28%{clip-path:inset(74% 0 0 0);transform:translate(-3px,0)}
+      42%{clip-path:inset(56% 0 0 0);transform:translate(0,0)}
+      56%{clip-path:inset(80% 0 0 0);transform:translate(-2px,1px)}
+      70%{clip-path:inset(66% 0 0 0);transform:translate(3px,-1px)}
+      84%{clip-path:inset(78% 0 0 0);transform:translate(-1px,2px)}
+      100%{clip-path:inset(86% 0 0 0);transform:translate(-2px,1px)}
+    }
+
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      z-index:1200;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.56);
+      backdrop-filter:blur(12px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 220ms ease;
+      padding:12px;
+    }
+    .modalOverlay.show{opacity:1;pointer-events:auto}
+
+    .modal{
+      width:min(980px, 96vw);
+      max-height:calc(100vh - 24px);
+      overflow:auto;
+      overscroll-behavior:contain;
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.82));
+      border:1px solid var(--border);
+      box-shadow:0 28px 90px var(--shadow);
+      padding:18px;
+      text-align:center;
+      backdrop-filter:blur(14px);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:14px;
+      align-items:stretch;
+      margin-bottom:14px;
+    }
+    .heroCard{
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:0 12px 36px rgba(0,0,0,.08);
+      text-align:left;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:188px;
+    }
+    .badgeRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .badge{
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.08);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .hero h2{
+      margin:0;
+      font-size:clamp(28px,4vw,54px);
+      line-height:1.02;
+    }
+    .hero p{
+      margin:10px 0 0;
+      max-width:42ch;
+      font-size:15px;
+      line-height:1.45;
+      opacity:.82;
+    }
+
+    .miniArt{
+      border-radius:24px;
+      background:linear-gradient(160deg, rgba(11,11,11,.96), rgba(11,11,11,.76));
+      position:relative;
+      overflow:hidden;
+      min-height:188px;
+      box-shadow:0 18px 40px rgba(0,0,0,.16);
+    }
+    .miniArt::before,.miniArt::after{
+      content:"";
+      position:absolute;
+      inset:auto;
+      border-radius:999px;
+      filter:blur(8px);
+    }
+    .miniArt::before{
+      width:180px;
+      height:180px;
+      background:radial-gradient(circle at 30% 30%, #fff 0, #ffef7b 42%, transparent 70%);
+      left:-22px;
+      top:-22px;
+    }
+    .miniArt::after{
+      width:220px;
+      height:220px;
+      background:radial-gradient(circle at 40% 40%, #ff2bd6 0, #00e5ff 50%, transparent 76%);
+      right:-60px;
+      bottom:-70px;
+    }
+    .miniSnake{
+      position:absolute;
+      inset:18px;
+      display:grid;
+      place-items:end start;
+      gap:10px;
+    }
+    .orb{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background:rgba(255,255,255,.92);
+      box-shadow:0 10px 18px rgba(0,0,0,.24);
+    }
+    .orb.small{width:36px;height:36px;opacity:.78}
+    .orb.tiny{width:28px;height:28px;opacity:.62}
+
+    .sectionTitle{
+      margin:10px 0 10px;
+      text-align:left;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      opacity:.72;
+    }
+    .pickerRow{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+    .pickerBlock{
+      padding:12px;
+      border-radius:22px;
+      background:rgba(255,255,255,.48);
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .skinbtn,.modebtn{
+      appearance:none;
+      border:1px solid rgba(0,0,0,.18);
+      background:rgba(255,255,255,.72);
+      border-radius:18px;
+      padding:12px;
+      cursor:pointer;
+      width:100%;
+      text-align:left;
+      transition:transform .12s ease, background .12s ease, box-shadow .12s ease;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
+      min-height:80px;
+      font-weight:950;
+    }
+    .skinbtn:active,.modebtn:active,.btn:active{transform:translateY(1px)}
+    .skinbtn[aria-pressed="true"],.modebtn[aria-pressed="true"]{
+      background:#fff;
+      outline:2px solid rgba(0,0,0,.16);
+      box-shadow:0 14px 30px rgba(0,0,0,.12);
+    }
+    .choiceTitle{display:block;font-size:16px}
+    .choiceMeta{display:none}
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin:12px 0 4px;
+    }
+    .card{
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.12);
+      background:rgba(255,255,255,.50);
+      padding:12px;
+      box-shadow:0 12px 28px rgba(0,0,0,.08);
+      display:grid;
+      grid-template-columns:160px 1fr;
+      gap:10px;
+      align-items:center;
+      min-height:92px;
+    }
+    .card .desc{
+      margin:0;
+      opacity:.84;
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(0,0,0,.22);
+      background:#fff;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 14px 36px var(--shadow);
     }
 
     .game{
-      position: fixed;
-      inset: 0;
-      height: 100dvh;
-      display: none;
-      z-index: 1;
-      padding: 14px;
-      display: grid;
-      grid-template-rows: 1fr auto;
-      justify-items: center;
-      align-items: center;
-      gap: 10px;
+      position:fixed;
+      inset:0;
+      height:100dvh;
+      display:none;
+      z-index:1;
+      padding:12px;
+      grid-template-rows:1fr auto;
+      justify-items:center;
+      align-items:center;
+      gap:8px;
     }
-    .game.show{ display: grid; }
-
+    .game.show{display:grid}
     .stage{
-      position: relative;
-      width: min(1400px, 98vw);
-      height: 100%;
-      background: rgba(255,255,255,.25);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      box-shadow: 0 24px 80px var(--shadow);
-      overflow: hidden;
+      position:relative;
+      width:min(1320px,98vw);
+      height:100%;
+      background:rgba(255,255,255,.22);
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:0 24px 80px var(--shadow);
+      overflow:hidden;
     }
+    canvas{width:100%;height:100%;display:block}
 
-    canvas{ width: 100%; height: 100%; display: block; }
-
-    .overlay{
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(8px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 220ms ease;
+    .hud{
+      position:absolute;
+      left:14px;
+      bottom:14px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      z-index:5;
+      pointer-events:none;
     }
-    .overlay.show{ opacity: 1; pointer-events: auto; }
-
-    .modalOverlay{
-      position: fixed;
-      inset: 0;
-      z-index: 1200;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 220ms ease;
+    .hudChip{
+      background:rgba(255,255,255,.90);
+      border:1px solid rgba(0,0,0,.16);
+      border-radius:999px;
+      padding:9px 12px;
+      box-shadow:0 14px 36px rgba(0,0,0,.16);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.03em;
     }
-    .modalOverlay.show{ opacity: 1; pointer-events: auto; }
-
-    .modal{
-      width: min(560px, 92%);
-      border-radius: 18px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      box-shadow: 0 24px 80px var(--shadow);
-      padding: 18px;
-      text-align: center;
-    }
-
-    .modal h2{ margin: 0 0 8px; font-size: 28px; }
-    .modal p{ margin: 0 0 14px; opacity: .85; }
-
-    .cards{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin: 12px 0 14px;
-      text-align: left;
-    }
-
-    .card{
-      border-radius: 16px;
-      border:  1px solid rgba(0,0,0,.16);
-      background: rgba(255,255,255,.55);
-      padding: 12px;
-      box-shadow: 0 14px 36px var(--shadow);
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .modebtn{
-      appearance: none;
-      border: 1px solid rgba(0,0,0,.25);
-      background: rgba(255,255,255,.80);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-weight: 950;
-      cursor: pointer;
-      transition: transform 120ms ease, background 120ms ease;
-      min-width: 160px;
-    }
-    .modebtn:active{ transform: translateY(1px); }
-    .modebtn[aria-pressed="true"]{
-      background: rgba(255,255,255,.98);
-      outline: 2px solid rgba(0,0,0,.18);
-    }
-
-    .card h3{ margin: 0 0 6px; font-size: 16px; letter-spacing: .02em; }
-    .card .desc{ margin: 0; opacity: .86; font-size: 14px; line-height: 1.35; }
-
-    .actions{
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
-    .btn{
-      appearance: none;
-      border: 1px solid rgba(0,0,0,.25);
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 14px 36px var(--shadow);
-      transition: transform 120ms ease;
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    .hint{
-      width: min(1400px, 98vw);
-      font-size: 14px;
-      opacity: .8;
-      text-align: center;
-    }
-
     .toast{
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,.88);
-      border: 1px solid rgba(0,0,0,.18);
-      border-radius: 999px;
-      padding: 10px 14px;
-      box-shadow: 0 14px 36px var(--shadow);
-      font-weight: 950;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 180ms ease;
+      position:absolute;
+      top:14px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(0,0,0,.16);
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow:0 14px 36px rgba(0,0,0,.16);
+      font-weight:950;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease;
+      z-index:6;
     }
-    .toast.show{ opacity: 1; }
+    .toast.show{opacity:1}
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.55);
+      backdrop-filter:blur(8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease;
+      z-index:7;
+    }
+    .overlay.show{opacity:1;pointer-events:auto}
+    .hint{
+      width:min(1320px,98vw);
+      font-size:14px;
+      opacity:.8;
+      text-align:center;
+    }
+
+    @media (max-width: 900px){
+      .hero{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr}
+      .card{grid-template-columns:1fr}
+      .pickerRow{grid-template-columns:1fr 1fr}
+      .modal{padding:14px}
+      .stage{border-radius:20px}
+    }
+    @media (max-width: 640px){
+      body{overflow:hidden}
+      .modal{
+        max-height:calc(100vh - 18px);
+        padding:12px;
+      }
+      .pickerRow{grid-template-columns:1fr}
+      .skinbtn,.modebtn{min-height:auto}
+      .choiceTitle{font-size:15px}
+      .hud{left:10px;right:10px;bottom:10px}
+      .hudChip{font-size:11px;padding:8px 10px}
+    }
   </style>
 </head>
-
 <body>
   <div class="intro" id="intro">
     <h1 class="title glitch" id="enter" data-text="RYKU SNAKE">RYKU SNAKE</h1>
@@ -260,37 +420,59 @@
 
   <div class="modalOverlay" id="modeOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modeTitle" aria-describedby="modeDesc">
-      <h2 id="modeTitle">Choose mode</h2>
-      <p id="modeDesc">Pick a mode and press Start.</p>
+      <div class="hero">
+        <div class="heroCard">
+          <div class="badgeRow">
+            <span class="badge">snake skins</span>
+            <span class="badge">game modes</span>
+            <span class="badge">pixel clear</span>
+          </div>
+          <h2 id="modeTitle">Choose your snake</h2>
+          <p id="modeDesc">Pick the look first, then start the mode you want. The menu is compact and stays on one screen.</p>
+        </div>
+        <div class="miniArt" aria-hidden="true">
+          <div class="miniSnake">
+            <div class="orb"></div>
+            <div class="orb small"></div>
+            <div class="orb tiny"></div>
+            <div class="orb small"></div>
+            <div class="orb"></div>
+          </div>
+        </div>
+      </div>
 
+      <div class="pickerBlock" aria-labelledby="skinTitle">
+        <p class="sectionTitle" id="skinTitle">Snake look</p>
+        <div class="pickerRow">
+          <button class="skinbtn" id="pickSkinOg" type="button" aria-pressed="true">
+            <span class="choiceTitle">OG</span>
+          </button>
+          <button class="skinbtn" id="pickSkinIrina" type="button" aria-pressed="false">
+            <span class="choiceTitle">Irina</span>
+          </button>
+          <button class="skinbtn" id="pickSkinPinky" type="button" aria-pressed="false">
+            <span class="choiceTitle">Pinky</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sectionTitle">Game mode</div>
       <div class="cards">
         <div class="card">
           <button class="modebtn" id="pickClassic" type="button" aria-pressed="true">CLASSIC</button>
-          <div>
-            <p class="desc">Eat, grow, avoid walls and your body.</p>
-          </div>
+          <div><p class="desc">Eat, grow, avoid walls and your body.</p></div>
         </div>
-
         <div class="card">
           <button class="modebtn" id="pickBricks" type="button" aria-pressed="false">BRICKS</button>
-          <div>
-            <p class="desc">Each time you eat, a new brick appears.</p>
-          </div>
+          <div><p class="desc">Each time you eat, a new brick appears.</p></div>
         </div>
-
         <div class="card">
           <button class="modebtn" id="pickDegen" type="button" aria-pressed="false">DEGEN MODE</button>
-          <div>
-            <p class="desc">Every step you take is a game bonus. No chance of winning.</p>
-          </div>
+          <div><p class="desc">Every step you take is a game bonus. No chance of winning.</p></div>
         </div>
-
         <div class="card">
           <button class="modebtn" id="pickStep" type="button" aria-pressed="false">STEP by STEP</button>
-          <div>
- 
-            <p class="desc">Every time you grow, a bonus will appear on you or on the field.</p>
-          </div>
+          <div><p class="desc">Every time you grow, a bonus will appear on you or on the field.</p></div>
         </div>
       </div>
 
@@ -305,7 +487,11 @@
     <section class="stage" id="stageEl">
       <canvas id="c"></canvas>
       <div class="toast" id="toast" aria-live="polite"></div>
-
+      <div class="hud" aria-hidden="true">
+        <div class="hudChip" id="hudMode">Mode: Classic</div>
+        <div class="hudChip" id="hudSkin">Snake: OG</div>
+        <div class="hudChip" id="hudProgress">Progress: --</div>
+      </div>
       <div class="overlay" id="overlay">
         <div class="modal">
           <h2 id="ovTitle">Game Over</h2>
@@ -317,7 +503,6 @@
         </div>
       </div>
     </section>
-
     <div class="hint">
       Website made by chad <a href="https://x.com/realsirandrew" target="_blank" rel="noopener noreferrer">realsir</a> for the Raiku community.
     </div>
@@ -325,150 +510,122 @@
 
 <script>
 (() => {
-  const intro = document.getElementById('intro');
-  const enter = document.getElementById('enter');
+  const intro=document.getElementById('intro'), enter=document.getElementById('enter'), modeOverlay=document.getElementById('modeOverlay');
+  const pickClassic=document.getElementById('pickClassic'), pickBricks=document.getElementById('pickBricks'), pickDegen=document.getElementById('pickDegen'), pickStep=document.getElementById('pickStep');
+  const pickSkinOg=document.getElementById('pickSkinOg'), pickSkinIrina=document.getElementById('pickSkinIrina'), pickSkinPinky=document.getElementById('pickSkinPinky');
+  const startBtn=document.getElementById('startGame'), backBtn=document.getElementById('backToTitle');
+  const gameRoot=document.getElementById('gameRoot'), stageEl=document.getElementById('stageEl'), canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+  const hudMode=document.getElementById('hudMode'), hudSkin=document.getElementById('hudSkin'), hudProgress=document.getElementById('hudProgress');
+  const toastEl=document.getElementById('toast'), overlay=document.getElementById('overlay'), ovTitle=document.getElementById('ovTitle'), ovText=document.getElementById('ovText'), restartBtn=document.getElementById('restart'), menuBtn=document.getElementById('menu');
 
-  const modeOverlay = document.getElementById('modeOverlay');
-  const pickClassic = document.getElementById('pickClassic');
-  const pickBricks  = document.getElementById('pickBricks');
-  const pickDegen   = document.getElementById('pickDegen');
-  const pickStep    = document.getElementById('pickStep');
-  const startBtn    = document.getElementById('startGame');
-  const backBtn     = document.getElementById('backToTitle');
-
-  const gameRoot = document.getElementById('gameRoot');
-  const stageEl  = document.getElementById('stageEl');
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
-
-  const toastEl = document.getElementById('toast');
-
-  const overlay = document.getElementById('overlay');
-  const ovTitle = document.getElementById('ovTitle');
-  const ovText  = document.getElementById('ovText');
-  const restartBtn = document.getElementById('restart');
-  const menuBtn = document.getElementById('menu');
-
-  const sprite = new Image();
-  sprite.src = "1.png";
-
-  const CELL_PX = 40;
-  let COLS = 24, ROWS = 24, W = 600, H = 600, CELL = CELL_PX;
-
-  const MODE = {
-    CLASSIC: "CLASSIC",
-    BRICKS: "BRICKS",
-    DEGEN: "DEGEN MODE",
-    STEP: "STEP by STEP"
+  const CELL_PX=48;
+  let COLS=20, ROWS=20, W=600, H=600, CELL=CELL_PX;
+  const MODE={CLASSIC:'CLASSIC',BRICKS:'BRICKS',DEGEN:'DEGEN MODE',STEP:'STEP by STEP'};
+  const SKIN={OG:'OG',IRINA:'Irina',PINKY:'Pinky'};
+  const SKIN_CONFIG={
+    OG:{label:'OG',sequence:[],finishOnComplete:false},
+    Irina:{label:'Irina',sequence:Array.from({length:13},(_,i)=>`irina-${i+1}.png`),finishOnComplete:true},
+    Pinky:{label:'Pinky',sequence:Array.from({length:8},(_,i)=>`pinky-${i+1}.png`),finishOnComplete:true}
   };
-  let mode = MODE.CLASSIC;
 
-  let started = false;
-  let running = false;
-  let rafId = 0;
-  let lastStepTs = 0;
+  let mode=MODE.CLASSIC, skin=SKIN.OG, started=false, running=false, rafId=0, lastStepTs=0;
+  let snake=[], dir={x:0,y:-1}, nextDir={x:0,y:-1}, foods=[], bricks=[], baseStepMs=95;
+  let lives=0, slowUntilTs=0, chainIndex=0, pendingExtraGrowth=0, collectedParts=[], currentFoodImageSrc='1.png';
 
-  let snake = [];
-  let dir = {x: 0, y: -1};
-  let nextDir = {x: 0, y: -1};
+  const imageCache=new Map();
+  const getImage=src => {
+    if(!imageCache.has(src)){
+      const img=new Image();
+      img.src=src;
+      imageCache.set(src, img);
+    }
+    return imageCache.get(src);
+  };
+  ['1.png', ...SKIN_CONFIG.Irina.sequence, ...SKIN_CONFIG.Pinky.sequence].forEach(getImage);
 
-  let foods = [];
-  let bricks = [];
-
-  let baseStepMs = 95;
-
-  let lives = 0;
-  let slowUntilTs = 0;
-  let chainIndex = 0;
-
-  let pendingExtraGrowth = 0; 
-
-  function randInt(max){ return Math.floor(Math.random() * max); }
-  function cellKey(x,y){ return `${x},${y}`; }
+  const randInt=max=>Math.floor(Math.random()*max);
+  const cellKey=(x,y)=>`${x},${y}`;
+  const activeSkinConfig=()=>SKIN_CONFIG[skin];
+  const activeSequence=()=>activeSkinConfig().sequence;
 
   function showToast(text, ms=900){
-    toastEl.textContent = text;
+    toastEl.textContent=text;
     toastEl.classList.add('show');
-    window.clearTimeout(showToast._t);
-    showToast._t = window.setTimeout(() => toastEl.classList.remove('show'), ms);
+    clearTimeout(showToast._t);
+    showToast._t=setTimeout(()=>toastEl.classList.remove('show'), ms);
   }
 
   function fitCanvas(){
-    const rect = stageEl.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const r=stageEl.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    W=Math.floor(r.width);
+    H=Math.floor(r.height);
+    canvas.style.width=W+'px';
+    canvas.style.height=H+'px';
+    canvas.width=Math.floor(W*dpr);
+    canvas.height=Math.floor(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
 
-    W = Math.floor(rect.width);
-    H = Math.floor(rect.height);
-
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    canvas.width = Math.floor(W * dpr);
-    canvas.height = Math.floor(H * dpr);
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    COLS = Math.max(8, Math.floor(W / CELL_PX));
-    ROWS = Math.max(8, Math.floor(H / CELL_PX));
-
-    CELL = Math.max(10, Math.floor(Math.min(W / COLS, H / ROWS)));
-
-    COLS = Math.max(8, Math.floor(W / CELL));
-    ROWS = Math.max(8, Math.floor(H / CELL));
+    COLS=Math.max(8,Math.floor(W/CELL_PX));
+    ROWS=Math.max(8,Math.floor(H/CELL_PX));
+    CELL=Math.max(12,Math.floor(Math.min(W/COLS,H/ROWS)));
+    COLS=Math.max(8,Math.floor(W/CELL));
+    ROWS=Math.max(8,Math.floor(H/CELL));
   }
 
-  function stopLoop(){
-    running = false;
-    cancelAnimationFrame(rafId);
-  }
+  const stopLoop=()=>{running=false; cancelAnimationFrame(rafId)};
+  const showGameOver=(t,x)=>{ovTitle.textContent=t; ovText.textContent=x; overlay.classList.add('show'); restartBtn.focus()};
+  const hideGameOver=()=>overlay.classList.remove('show');
 
-  function showGameOver(title, text){
-    ovTitle.textContent = title;
-    ovText.textContent = text;
-    overlay.classList.add('show');
-    restartBtn.focus();
-  }
-
-  function hideGameOver(){
-    overlay.classList.remove('show');
+  function updateHud(){
+    hudMode.textContent=`Mode: ${mode}`;
+    hudSkin.textContent=`Snake: ${skin}`;
+    hudProgress.textContent=activeSequence().length ? `Progress: ${collectedParts.length}/${activeSequence().length}` : 'Progress: endless';
   }
 
   function occupiedSet(includeFoods=true){
-    const set = new Set();
-    for(const s of snake) set.add(cellKey(s.x, s.y));
-    for(const b of bricks) set.add(cellKey(b.x, b.y));
-    if(includeFoods){
-      for(const f of foods) set.add(cellKey(f.x, f.y));
-    }
-    return set;
+    const s=new Set();
+    snake.forEach(v=>s.add(cellKey(v.x,v.y)));
+    bricks.forEach(v=>s.add(cellKey(v.x,v.y)));
+    if(includeFoods) foods.forEach(v=>s.add(cellKey(v.x,v.y)));
+    return s;
+  }
+
+  function nextCollectibleSrc(){
+    const seq=activeSequence();
+    return seq[collectedParts.length] || '1.png';
   }
 
   function placeFoodOne(){
-    const taken = occupiedSet(true);
-    const tries = Math.min(18000, COLS * ROWS * 14);
-
-    for(let i=0;i<tries;i++){
-      const fx = randInt(COLS), fy = randInt(ROWS);
-      const k = cellKey(fx,fy);
-      if(!taken.has(k)) return {x: fx, y: fy};
+    const taken=occupiedSet(true);
+    const src=nextCollectibleSrc();
+    for(let i=0;i<Math.min(18000,COLS*ROWS*14);i++){
+      const fx=randInt(COLS), fy=randInt(ROWS), k=cellKey(fx,fy);
+      if(!taken.has(k)) return {x:fx,y:fy,src};
     }
-    return {x: randInt(COLS), y: randInt(ROWS)};
+    return {x:randInt(COLS), y:randInt(ROWS), src};
   }
 
   function ensureFoodCount(n){
-    foods = foods.slice(0, n);
-    while(foods.length < n) foods.push(placeFoodOne());
+    foods=foods.slice(0,n);
+    while(foods.length<n) foods.push(placeFoodOne());
+    currentFoodImageSrc=foods[0]?.src || '1.png';
+    updateHud();
+  }
+
+  function syncFoodSprites(){
+    const src=nextCollectibleSrc();
+    foods=foods.map(f=>({...f,src}));
+    currentFoodImageSrc=src;
   }
 
   function spawnBricks(count){
-    const taken = occupiedSet(true);
-    const tries = Math.min(26000, COLS * ROWS * 20);
-
-    let placed = 0;
-    for(let i=0;i<tries && placed<count;i++){
-      const bx = randInt(COLS), by = randInt(ROWS);
-      const k = cellKey(bx,by);
+    const taken=occupiedSet(true);
+    let placed=0;
+    for(let i=0;i<Math.min(26000,COLS*ROWS*20)&&placed<count;i++){
+      const bx=randInt(COLS), by=randInt(ROWS), k=cellKey(bx,by);
       if(!taken.has(k)){
-        bricks.push({x: bx, y: by});
+        bricks.push({x:bx,y:by});
         taken.add(k);
         placed++;
       }
@@ -476,149 +633,154 @@
   }
 
   function shrinkSnake(by){
-    const target = Math.max(3, snake.length - by);
-    while(snake.length > target) snake.pop();
+    const target=Math.max(3,snake.length-by);
+    while(snake.length>target) snake.pop();
   }
 
   function collisionSelf(nh, willEat){
-    const tail = snake[snake.length - 1];
+    const tail=snake[snake.length-1];
     for(let i=1;i<snake.length;i++){
-      const s = snake[i];
-      if(!willEat && i === snake.length - 1 && s.x === tail.x && s.y === tail.y) continue;
-      if(s.x === nh.x && s.y === nh.y) return true;
+      const s=snake[i];
+      if(!willEat && i===snake.length-1 && s.x===tail.x && s.y===tail.y) continue;
+      if(s.x===nh.x && s.y===nh.y) return true;
     }
     return false;
   }
 
   function consumeLife(reason){
-    if(mode !== MODE.DEGEN && mode !== MODE.STEP) return false;
-    if(lives <= 0) return false;
-    lives -= 1;
+    if(mode!==MODE.DEGEN && mode!==MODE.STEP) return false;
+    if(lives<=0) return false;
+    lives--;
     showToast(`Life lost (${reason})`);
     return true;
   }
 
   function effectiveStepMs(nowTs){
-    let ms = baseStepMs;
-    if((mode === MODE.DEGEN || mode === MODE.STEP) && nowTs < slowUntilTs){
-      ms = Math.floor(ms * 1.6);
-    }
+    let ms=baseStepMs;
+    if((mode===MODE.DEGEN||mode===MODE.STEP) && nowTs<slowUntilTs) ms=Math.floor(ms*1.6);
     return ms;
   }
 
-  const ACTIONS_DEGEN = [
-    { run(nowTs){ lives += 1; showToast("+1 life"); } },
-    { run(nowTs){ spawnBricks(4); showToast("+4 obstacles"); } },
-    { run(nowTs){ slowUntilTs = Math.max(slowUntilTs, nowTs) + 10_000; showToast("Slow 10s"); } },
-    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
-    { run(nowTs){ shrinkSnake(5); showToast("Shrink -5"); } },
-    { run(nowTs){ ensureFoodCount(2); showToast("2 foods"); } },
-    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+  const ACTIONS_DEGEN=[
+    {run(){lives+=1; showToast('+1 life')}},
+    {run(){spawnBricks(4); showToast('+4 obstacles')}},
+    {run(nowTs){slowUntilTs=Math.max(slowUntilTs, nowTs)+10000; showToast('Slow 10s')}},
+    {run(){spawnBricks(3); showToast('+3 obstacles')}},
+    {run(){shrinkSnake(5); showToast('Shrink -5')}},
+    {run(){ensureFoodCount(2); showToast('2 foods')}},
+    {run(){spawnBricks(3); showToast('+3 obstacles')}}
   ];
 
-  const ACTIONS_STEP = [
-    { run(nowTs){ lives += 1; showToast("+1 life"); } },
-    { run(nowTs){ spawnBricks(4); showToast("+4 obstacles"); } },
-    { run(nowTs){ slowUntilTs = Math.max(slowUntilTs, nowTs) + 10_000; showToast("Slow 10s"); } },
-    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
-    { run(nowTs){ shrinkSnake(5); showToast("Shrink -5"); } },
-    { run(nowTs){ ensureFoodCount(2); showToast("2 foods"); } },
-    { run(nowTs){ pendingExtraGrowth += 3; showToast("Grow +3"); } },  
-    { run(nowTs){ spawnBricks(3); showToast("+3 obstacles"); } },
+  const ACTIONS_STEP=[
+    {run(){lives+=1; showToast('+1 life')}},
+    {run(){spawnBricks(4); showToast('+4 obstacles')}},
+    {run(nowTs){slowUntilTs=Math.max(slowUntilTs, nowTs)+10000; showToast('Slow 10s')}},
+    {run(){spawnBricks(3); showToast('+3 obstacles')}},
+    {run(){shrinkSnake(5); showToast('Shrink -5')}},
+    {run(){ensureFoodCount(2); showToast('2 foods')}},
+    {run(){pendingExtraGrowth+=3; showToast('Grow +3')}},
+    {run(){spawnBricks(3); showToast('+3 obstacles')}}
   ];
 
   function applyNextChainAction(nowTs){
-    const list = (mode === MODE.STEP) ? ACTIONS_STEP : ACTIONS_DEGEN;
-    const n = list.length;
-    const idx = chainIndex % n;
-    const action = list[idx];
+    const list=mode===MODE.STEP ? ACTIONS_STEP : ACTIONS_DEGEN;
+    const n=list.length;
+    const idx=chainIndex % n;
+    const action=list[idx];
     chainIndex++;
     action.run(nowTs);
-
     if(chainIndex % n === 0 && n >= 2){
-      const a = (Math.floor(chainIndex / n) - 1) % n;
-      const b = (a + 3) % n;
-      const t = list[a];
-      list[a] = list[b];
-      list[b] = t;
+      const a=(Math.floor(chainIndex/n)-1) % n, b=(a+3) % n, t=list[a];
+      list[a]=list[b];
+      list[b]=t;
     }
   }
 
   function resetSpecialModes(){
-    lives = 1;
-    slowUntilTs = 0;
-    chainIndex = 0;
-    pendingExtraGrowth = 0;
+    lives=1;
+    slowUntilTs=0;
+    chainIndex=0;
+    pendingExtraGrowth=0;
     ensureFoodCount(1);
+  }
+
+  function segmentSprite(index){
+    if(index===0) return '1.png';
+    if(skin===SKIN.OG) return '1.png';
+    return collectedParts[index-1] || '1.png';
   }
 
   function resetGame(){
     fitCanvas();
     stopLoop();
     hideGameOver();
+    bricks=[];
+    foods=[];
+    collectedParts=[];
+    currentFoodImageSrc=nextCollectibleSrc();
+    baseStepMs=95;
+    lastStepTs=0;
 
-    bricks = [];
-    foods = [];
-    baseStepMs = 95;
-    lastStepTs = 0;
-
-    const sx = Math.floor(COLS / 2);
-    const sy = Math.floor(ROWS / 2);
-
-    snake = [
-      {x: sx, y: sy},
-      {x: sx, y: sy + 1},
-      {x: sx, y: sy + 2},
+    const sx=Math.floor(COLS/2), sy=Math.floor(ROWS/2);
+    snake=[
+      {x:sx,y:sy},
+      {x:sx,y:sy+1},
+      {x:sx,y:sy+2},
     ];
 
-    dir = {x: 0, y: -1};
-    nextDir = {x: 0, y: -1};
-
+    dir={x:0,y:-1};
+    nextDir={x:0,y:-1};
     ensureFoodCount(1);
 
-    if(mode === MODE.DEGEN || mode === MODE.STEP){
-      resetSpecialModes();
-    }
+    if(mode===MODE.DEGEN || mode===MODE.STEP) resetSpecialModes();
 
-    running = true;
-    rafId = requestAnimationFrame(loop);
+    updateHud();
+    running=true;
+    rafId=requestAnimationFrame(loop);
+  }
+
+  function completeSequenceIfNeeded(){
+    const cfg=activeSkinConfig();
+    if(!cfg.finishOnComplete) return false;
+    if(collectedParts.length < cfg.sequence.length) return false;
+    updateHud();
+    showGameOver('You Win', `${cfg.label} collection complete.`);
+    stopLoop();
+    return true;
   }
 
   function step(nowTs){
-    if(mode === MODE.DEGEN){
-      applyNextChainAction(nowTs);
-    }
+    if(mode===MODE.DEGEN) applyNextChainAction(nowTs);
 
-    dir = nextDir;
+    dir=nextDir;
+    const head=snake[0];
+    const nh={x:head.x+dir.x, y:head.y+dir.y};
 
-    const head = snake[0];
-    const nh = {x: head.x + dir.x, y: head.y + dir.y};
-
-    const hitWall = (nh.x < 0 || nh.x >= COLS || nh.y < 0 || nh.y >= ROWS);
+    const hitWall=(nh.x<0 || nh.x>=COLS || nh.y<0 || nh.y>=ROWS);
     if(hitWall){
-      if(consumeLife("wall")) return;
-      showGameOver("Game Over", "You hit the wall.");
+      if(consumeLife('wall')) return;
+      showGameOver('Game Over', 'You hit the wall.');
       stopLoop();
       return;
     }
 
-    const hitBrick = bricks.some(b => b.x === nh.x && b.y === nh.y);
+    const hitBrick=bricks.some(b=>b.x===nh.x && b.y===nh.y);
     if(hitBrick){
-      if(consumeLife("obstacle")) return;
-      showGameOver("Game Over", "You hit an obstacle.");
+      if(consumeLife('obstacle')) return;
+      showGameOver('Game Over', 'You hit an obstacle.');
       stopLoop();
       return;
     }
 
-    let eatenIdx = -1;
+    let eatenIdx=-1;
     for(let i=0;i<foods.length;i++){
-      if(foods[i].x === nh.x && foods[i].y === nh.y){ eatenIdx = i; break; }
+      if(foods[i].x===nh.x && foods[i].y===nh.y){ eatenIdx=i; break; }
     }
-    const willEat = eatenIdx !== -1;
+    const willEat=eatenIdx!==-1;
 
     if(collisionSelf(nh, willEat)){
-      if(consumeLife("self")) return;
-      showGameOver("Game Over", "You hit yourself.");
+      if(consumeLife('self')) return;
+      showGameOver('Game Over', 'You hit yourself.');
       stopLoop();
       return;
     }
@@ -626,246 +788,225 @@
     snake.unshift(nh);
 
     if(willEat){
-      baseStepMs = Math.max(55, baseStepMs - 1);
+      baseStepMs=Math.max(55, baseStepMs-1);
 
-      foods.splice(eatenIdx, 1);
+      const eatenFood=foods[eatenIdx];
+      foods.splice(eatenIdx,1);
+
+      const seq=activeSequence();
+      if(seq.length && eatenFood?.src){
+        collectedParts.push(eatenFood.src);
+        showToast(`${skin}: ${collectedParts.length}/${seq.length}`, 1000);
+      }
+
+      if(mode===MODE.BRICKS) spawnBricks(1);
+      if(mode===MODE.STEP) applyNextChainAction(nowTs);
+      if(completeSequenceIfNeeded()) return;
+
+      syncFoodSprites();
       foods.push(placeFoodOne());
-
-      if(mode === MODE.BRICKS){
-        spawnBricks(1);
-      }
-
-      if(mode === MODE.STEP){
-        applyNextChainAction(nowTs);
-      }
-
-
+      updateHud();
     } else {
-      if(pendingExtraGrowth > 0){
-        pendingExtraGrowth -= 1; 
-      } else {
-        snake.pop();
-      }
+      if(pendingExtraGrowth>0) pendingExtraGrowth--;
+      else snake.pop();
     }
 
-    if(mode === MODE.DEGEN || mode === MODE.STEP){
-      if(foods.length === 0) ensureFoodCount(1);
+    if(mode===MODE.DEGEN || mode===MODE.STEP){
+      if(foods.length===0) ensureFoodCount(1);
+      else syncFoodSprites();
     }
   }
 
-  function drawSpriteInCell(cx, cy, scale = 0.86){
-    const x = cx * CELL;
-    const y = cy * CELL;
-
-    const pad = Math.max(1, Math.floor(CELL * (1 - scale) / 2));
-    const rx = x + pad;
-    const ry = y + pad;
-    const rw = CELL - pad * 2;
-    const rh = CELL - pad * 2;
-
-    if(sprite.complete && sprite.naturalWidth > 0){
-      ctx.drawImage(sprite, rx, ry, rw, rh);
-    } else {
-      ctx.fillStyle = "rgba(0,0,0,.85)";
-      ctx.fillRect(rx, ry, rw, rh);
-    }
+  function drawImageInCell(src,cx,cy,scale=.92){
+    const img=getImage(src);
+    const x=cx*CELL, y=cy*CELL;
+    const pad=Math.max(1, Math.floor(CELL*(1-scale)/2));
+    const rx=x+pad, ry=y+pad, rw=CELL-pad*2, rh=CELL-pad*2;
+    if(img.complete && img.naturalWidth>0) ctx.drawImage(img,rx,ry,rw,rh);
+    else { ctx.fillStyle='rgba(0,0,0,.85)'; ctx.fillRect(rx,ry,rw,rh); }
   }
 
-  function drawBrickInCell(cx, cy){
-    const x = cx * CELL;
-    const y = cy * CELL;
-
-    const pad = Math.max(1, Math.floor(CELL * 0.10));
-    const rx = x + pad;
-    const ry = y + pad;
-    const rw = CELL - pad * 2;
-    const rh = CELL - pad * 2;
-
+  function drawBrickInCell(cx,cy){
+    const x=cx*CELL, y=cy*CELL;
+    const pad=Math.max(1, Math.floor(CELL*.10));
+    const rx=x+pad, ry=y+pad, rw=CELL-pad*2, rh=CELL-pad*2;
     ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,.85)";
-    ctx.fillRect(rx, ry, rw, rh);
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(rx + Math.floor(rw*0.08), ry + Math.floor(rh*0.12), Math.floor(rw*0.55), Math.floor(rh*0.22));
+    ctx.fillStyle='rgba(0,0,0,.85)';
+    ctx.fillRect(rx,ry,rw,rh);
+    ctx.globalAlpha=.18;
+    ctx.fillStyle='#fff';
+    ctx.fillRect(rx+Math.floor(rw*.08), ry+Math.floor(rh*.12), Math.floor(rw*.55), Math.floor(rh*.22));
     ctx.restore();
   }
 
   function draw(){
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
 
-    ctx.globalAlpha = 0.12;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    for(let x=1; x<COLS; x++){
-      const px = x * CELL;
+    ctx.globalAlpha=.11;
+    ctx.strokeStyle='#000';
+    ctx.lineWidth=1;
+    for(let x=1;x<COLS;x++){
+      const px=x*CELL;
       ctx.beginPath();
-      ctx.moveTo(px, 0);
-      ctx.lineTo(px, ROWS * CELL);
+      ctx.moveTo(px,0);
+      ctx.lineTo(px,ROWS*CELL);
       ctx.stroke();
     }
-    for(let y=1; y<ROWS; y++){
-      const py = y * CELL;
+    for(let y=1;y<ROWS;y++){
+      const py=y*CELL;
       ctx.beginPath();
-      ctx.moveTo(0, py);
-      ctx.lineTo(COLS * CELL, py);
+      ctx.moveTo(0,py);
+      ctx.lineTo(COLS*CELL,py);
       ctx.stroke();
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha=1;
 
-    if(mode === MODE.BRICKS || mode === MODE.DEGEN || mode === MODE.STEP){
-      for(const b of bricks) drawBrickInCell(b.x, b.y);
+    if(mode===MODE.BRICKS || mode===MODE.DEGEN || mode===MODE.STEP){
+      bricks.forEach(b=>drawBrickInCell(b.x,b.y));
     }
 
-    for(const f of foods) drawSpriteInCell(f.x, f.y, 0.86);
+    foods.forEach(f=>drawImageInCell(f.src || currentFoodImageSrc, f.x, f.y, .92));
 
-    for(let i = snake.length - 1; i >= 0; i--){
-      const s = snake[i];
-      const isHead = i === 0;
-
-      drawSpriteInCell(s.x, s.y, 0.86);
-
-      if(isHead){
-        const x = s.x * CELL;
-        const y = s.y * CELL;
-        const pad = Math.max(1, Math.floor(CELL * 0.08));
-        ctx.strokeStyle = "rgba(0,0,0,.55)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x + pad, y + pad, CELL - pad*2, CELL - pad*2);
+    for(let i=snake.length-1;i>=0;i--){
+      const s=snake[i];
+      drawImageInCell(segmentSprite(i), s.x, s.y, .92);
+      if(i===0){
+        const x=s.x*CELL, y=s.y*CELL, pad=Math.max(1, Math.floor(CELL*.08));
+        ctx.strokeStyle='rgba(0,0,0,.55)';
+        ctx.lineWidth=2;
+        ctx.strokeRect(x+pad,y+pad,CELL-pad*2,CELL-pad*2);
       }
     }
   }
 
   function loop(ts){
     if(!running) return;
-
-    if(!lastStepTs) lastStepTs = ts;
-    const elapsed = ts - lastStepTs;
-
-    const target = effectiveStepMs(ts);
-    if(elapsed >= target){
-      lastStepTs = ts;
+    if(!lastStepTs) lastStepTs=ts;
+    if(ts-lastStepTs>=effectiveStepMs(ts)){
+      lastStepTs=ts;
       step(ts);
     }
-
     draw();
-    rafId = requestAnimationFrame(loop);
+    rafId=requestAnimationFrame(loop);
   }
 
   function setMode(newMode){
-    mode = newMode;
-    pickClassic.setAttribute("aria-pressed", String(mode === MODE.CLASSIC));
-    pickBricks.setAttribute("aria-pressed", String(mode === MODE.BRICKS));
-    pickDegen.setAttribute("aria-pressed", String(mode === MODE.DEGEN));
-    pickStep.setAttribute("aria-pressed", String(mode === MODE.STEP));
+    mode=newMode;
+    pickClassic.setAttribute('aria-pressed', String(mode===MODE.CLASSIC));
+    pickBricks.setAttribute('aria-pressed', String(mode===MODE.BRICKS));
+    pickDegen.setAttribute('aria-pressed', String(mode===MODE.DEGEN));
+    pickStep.setAttribute('aria-pressed', String(mode===MODE.STEP));
+    updateHud();
+  }
+
+  function setSkin(newSkin){
+    skin=newSkin;
+    pickSkinOg.setAttribute('aria-pressed', String(skin===SKIN.OG));
+    pickSkinIrina.setAttribute('aria-pressed', String(skin===SKIN.IRINA));
+    pickSkinPinky.setAttribute('aria-pressed', String(skin===SKIN.PINKY));
+    updateHud();
   }
 
   function openModeSelect(){
     modeOverlay.classList.add('show');
-    modeOverlay.setAttribute('aria-hidden', 'false');
-
-    let btn = pickClassic;
-    if(mode === MODE.BRICKS) btn = pickBricks;
-    if(mode === MODE.DEGEN) btn = pickDegen;
-    if(mode === MODE.STEP) btn = pickStep;
-    btn.focus();
+    modeOverlay.setAttribute('aria-hidden','false');
+    (skin===SKIN.IRINA ? pickSkinIrina : skin===SKIN.PINKY ? pickSkinPinky : pickSkinOg).focus();
   }
-
   function closeModeSelect(){
     modeOverlay.classList.remove('show');
-    modeOverlay.setAttribute('aria-hidden', 'true');
+    modeOverlay.setAttribute('aria-hidden','true');
   }
-
   function showGame(){
     gameRoot.classList.add('show');
-    gameRoot.setAttribute('aria-hidden', 'false');
+    gameRoot.setAttribute('aria-hidden','false');
   }
-
   function hideGame(){
     gameRoot.classList.remove('show');
-    gameRoot.setAttribute('aria-hidden', 'true');
+    gameRoot.setAttribute('aria-hidden','true');
   }
-
   function returnToMenu(){
     hideGameOver();
     stopLoop();
     openModeSelect();
   }
 
-  pickClassic.addEventListener('click', () => setMode(MODE.CLASSIC));
-  pickBricks.addEventListener('click', () => setMode(MODE.BRICKS));
-  pickDegen.addEventListener('click', () => setMode(MODE.DEGEN));
-  pickStep.addEventListener('click', () => setMode(MODE.STEP));
+  pickClassic.addEventListener('click',()=>setMode(MODE.CLASSIC));
+  pickBricks.addEventListener('click',()=>setMode(MODE.BRICKS));
+  pickDegen.addEventListener('click',()=>setMode(MODE.DEGEN));
+  pickStep.addEventListener('click',()=>setMode(MODE.STEP));
+  pickSkinOg.addEventListener('click',()=>setSkin(SKIN.OG));
+  pickSkinIrina.addEventListener('click',()=>setSkin(SKIN.IRINA));
+  pickSkinPinky.addEventListener('click',()=>setSkin(SKIN.PINKY));
 
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener('click',()=>{
     closeModeSelect();
     showGame();
     resetGame();
   });
 
-  backBtn.addEventListener('click', () => {
+  backBtn.addEventListener('click',()=>{
     closeModeSelect();
     hideGame();
     intro.classList.remove('hide');
-    intro.style.display = "grid";
-    started = false;
+    intro.style.display='grid';
+    started=false;
     stopLoop();
     enter.focus();
   });
 
-  restartBtn.addEventListener('click', () => resetGame());
-  menuBtn.addEventListener('click', () => returnToMenu());
+  restartBtn.addEventListener('click',()=>resetGame());
+  menuBtn.addEventListener('click',()=>returnToMenu());
 
-  function setDir(nx, ny){
-    if (dir.x === -nx && dir.y === -ny) return;
-    nextDir = {x: nx, y: ny};
+  function setDir(nx,ny){
+    if(dir.x===-nx && dir.y===-ny) return;
+    nextDir={x:nx,y:ny};
   }
 
-  window.addEventListener('keydown', (e) => {
-    if(modeOverlay.classList.contains('show') && e.key === "Escape"){
+  window.addEventListener('keydown',e=>{
+    if(modeOverlay.classList.contains('show') && e.key==='Escape'){
       e.preventDefault();
       backBtn.click();
       return;
     }
-    if(overlay.classList.contains('show') && e.key === "Escape"){
+    if(overlay.classList.contains('show') && e.key==='Escape'){
       e.preventDefault();
       returnToMenu();
       return;
     }
     if(!started || !running) return;
-
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
     switch(e.key){
-      case "ArrowUp": setDir(0, -1); break;
-      case "ArrowDown": setDir(0, 1); break;
-      case "ArrowLeft": setDir(-1, 0); break;
-      case "ArrowRight": setDir(1, 0); break;
+      case 'ArrowUp': setDir(0,-1); break;
+      case 'ArrowDown': setDir(0,1); break;
+      case 'ArrowLeft': setDir(-1,0); break;
+      case 'ArrowRight': setDir(1,0); break;
     }
-  }, {passive: false});
+  }, {passive:false});
 
-  window.addEventListener('resize', () => {
-    if(!started) return;
-    fitCanvas();
+  window.addEventListener('resize',()=>{
+    if(started) fitCanvas();
   });
 
   function enterGame(){
     if(started) return;
-    started = true;
-
+    started=true;
     intro.classList.add('hide');
-    setTimeout(() => {
-      intro.style.display = "none";
+    setTimeout(()=>{
+      intro.style.display='none';
       setMode(MODE.CLASSIC);
+      setSkin(SKIN.OG);
       openModeSelect();
     }, 420);
   }
 
   enter.addEventListener('click', enterGame);
-  enter.addEventListener('keydown', (e) => {
-    if(e.key === "Enter" || e.key === " ") enterGame();
+  enter.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.key===' ') enterGame();
   });
-  enter.setAttribute("tabindex", "0");
+  enter.setAttribute('tabindex','0');
 
   hideGame();
+  updateHud();
 })();
 </script>
 </body>
